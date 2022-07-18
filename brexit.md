@@ -59,12 +59,14 @@ Add `scales = "free_x"` as an argument to the `facet_wrap()` function.
 How does the visualization change? How is the story this visualization
 telling different than the story the original plot tells?
 
+Answer: Adding this code changes the x-axis.
+
 ``` r
 ggplot(brexit, aes(y = opinion, fill = opinion)) +
   geom_bar() +
   facet_wrap(~region,
     nrow = 1, labeller = label_wrap_gen(width = 12),
-    # ___
+    scales = "free_x"
   ) +
   guides(fill = FALSE) +
   labs(
@@ -96,8 +98,36 @@ visualisation telling different than the story the original plot tells?
 which means you’ll need to load it on top of the document as well.
 
 ``` r
-# code goes here
+brexit %>%
+  count(region, opinion) %>%
+  group_by(region) %>%
+  mutate(opinion_prop = n / sum(n))%>%
+  ggplot(aes(x = opinion_prop,
+             y = opinion,
+             fill = opinion)) + 
+  geom_col() +
+  facet_wrap(~region,
+    nrow = 1, labeller = label_wrap_gen(width = 12))+
+   guides(fill = FALSE) +
+  labs(
+    title = "Was Britain right/wrong to vote to leave EU?",
+    subtitle = "YouGov Survey Results, 2-3 September 2019",
+    caption = "Source: bit.ly/2lCJZVg",
+    x = "Proportion", y = NULL
+  ) +
+  scale_fill_manual(values = c(
+    "Wrong" = "#ef8a62",
+    "Right" = "#67a9cf",
+    "Don't know" = "gray"
+  )) +
+  theme_minimal()+
+  scale_x_continuous(label = percent)
 ```
+
+    ## Warning: `guides(<scale> = FALSE)` is deprecated. Please use `guides(<scale> =
+    ## "none")` instead.
+
+![](brexit_files/figure-gfm/ex2-1.png)<!-- -->
 
 ### Exercise 3 - Comparing proportions across bars
 
@@ -107,5 +137,35 @@ faceting by region and then improve the legend. How is the story this
 visualization telling different than the story the previous plot tells?
 
 ``` r
-# code goes here
+brexit %>%
+  count(region, opinion) %>%
+  group_by(region) %>%
+  mutate(opinion_prop = n / sum(n))%>%
+  ggplot(aes(x = opinion_prop,
+             y = fct_rev(region),
+             fill = opinion)) + 
+  geom_col(position = "dodge") +
+  #facet_wrap(~region,
+    #nrow = 1, labeller = label_wrap_gen(width = 12))+
+   #guides(fill = FALSE) +
+  labs(
+    title = "Was Britain right/wrong to vote to leave EU?",
+    subtitle = "YouGov Survey Results, 2-3 September 2019",
+    caption = "Source: bit.ly/2lCJZVg",
+    x = NULL, y = NULL, fill = "Opinion"
+  ) +
+  scale_fill_manual(values = c(
+    "Wrong" = "#ef8a62",
+    "Right" = "#67a9cf",
+    "Don't know" = "gray"
+  )) +
+  theme_minimal()+
+  scale_x_continuous(label = percent)
 ```
+
+![](brexit_files/figure-gfm/ex3-1.png)<!-- -->
+
+reminder: \# in the coding block turns code off
+
+also: guides(\_\_\_ = guide_legend(reverse = TRUE)) –\> but only for the
+label, not the figure (need to re-level for that)
